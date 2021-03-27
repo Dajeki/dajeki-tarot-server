@@ -1,0 +1,79 @@
+id,name,element_id,card_rank,upright,down, suit_id
+0,The Fool,3,0,"innocence, new beginnings, free spirit","recklessness, taken advantage of, inconsideration",5
+1,The Magician,3,1,"willpower, desire, creation, manifestation","trickery, illusions, out of touch",5
+2,The High Priestess,2,2,"intuitive, unconscious, inner voice","lack of center, lost inner voice, repressed feelings",5
+3,The Empress,4,3,"motherhood, fertility, nature","dependence, smothering, emptiness, nosiness",5
+4,The Emperor,1,4,"authority, structure, control, fatherhood","tyranny, rigidity, coldness",5
+5,The Hierophant,4,5,"tradition, conformity, morality, ethics","rebellion, subversiveness, new approaches",5
+6,The Lovers,3,6,"partnerships, duality, union","loss of balance, one-sidedness, disharmony",5
+7,The Chariot,2,7,"direction, control, willpower","lack of control, lack of direction, aggression",5
+8,Strength,1,8,"inner strength, bravery, compassion, focus","self doubt, weakness, insecurity",5
+9,The Hermit,4,9,"contemplation, search for truth, inner guidance","loneliness, isolation, lost your way",5
+10,Wheel of Fortune,1,10,"change, cycles, inevitable fate","no control, clinging to control, bad luck",5
+11,Justice,3,11,"cause and effect, clarity, truth","dishonesty, unaccountability, unfairness",5
+12,The Hanged Man,2,12,"sacrifice, release, martyrdom","stalling, needless sacrifice, fear of sacrifice",5
+13,Death,2,13,"end of cycle, beginnings, change, metamorphosis","fear of change, holding on, stagnation, decay",5
+14,Temperance,1,14,"middle path, patience, finding meaning","extremes, excess, lack of balance",5
+15,The Devil,4,15,"addiction, materialism, playfulness","freedom, release, restoring control",5
+16,The Tower,1,16,"sudden upheaval, broken pride, disaster","disaster avoided, delayed disaster, fear of suffering",5
+17,The Star,3,17,"hope, faith, rejuvenation","faithlessness, discouragement, insecurity",5
+18,The Moon,2,18,"unconscious, illusions, intuition","confusion, fear, misinterpretation",5
+19,The Sun,1,19,"joy, success, celebration, positivity","negativity, depression, sadness",5
+20,Judgment,1,20,"reflection, reckoning, awakening","lack of self awareness, doubt, self loathing",5
+21,The World,4,21,"fulfillment, harmony, completion","incompletion, no closure",5
+22,Ace of Wands,1,0,"creation, willpower, inspiration, desire","lack of energy, lack of passion, boredom",1
+23,Two of Wands,1,1,"planning, making decisions, leaving home","fear of change, playing safe, bad planning",1
+24,Three of Wands,1,2,"looking ahead, expansion, rapid growth","obstacles, delays, frustration",1
+25,Four of Wands,1,3,"community, home, celebration","lack of support, transience, home conflicts",1
+26,Five of Wands,1,4,"competition, rivalry, conflict","avoiding conflict, respecting differences",1
+27,Six of Wands,1,5,"victory, success, public reward","excess pride, lack of recognition, punishment",1
+28,Seven of Wands,1,6,"perseverance, defensive, maintaining control","give up, destroyed confidence, overwhelmed",1
+29,Eight of Wands,1,7,"rapid action, movement, quick decisions","panic, waiting, slowdown",1
+30,Nine of Wands,1,8,"resilience, grit, last stand","exhaustion, fatigue, questioning motivations",1
+31,Ten of Wands,1,9,"accomplishment, responsibility, burden","inability to delegate, overstressed, burnt out",1
+32,Page of Wands,1,10,"exploration, excitement, freedom","lack of direction, procrastination, creating conflict",1
+33,Knight of Wands,1,11,"action, adventure, fearlessness","anger, impulsiveness, recklessness",1
+34,Queen of Wands,1,12,"courage, determination, joy","selfishness, jealousy, insecurities",1
+35,King of Wands,1,13,"big picture, leader, overcoming challenges","impulsive, overbearing, unachievable expectations",1
+36,Ace of Cups,2,0,"new feelings, spirituality, intuition","emotional loss, blocked creativity, emptiness",2
+37,Two of Cups,2,1,"unity, partnership, connection","imbalance, broken communication, tension",2
+38,Three of Cups,2,2,"friendship, community, happiness","overindulgence, gossip, isolation",2
+39,Four of Cups,2,3,"apathy, contemplation, disconnectedness","sudden awareness, choosing happiness, acceptance",2
+40,Five of Cups,2,4,"loss, grief, self-pity","acceptance, moving on, finding peace",2
+41,Six of Cups,2,5,"familiarity, happy memories, healing","moving forward, leaving home, independence",2
+42,Seven of Cups,2,6,"searching for purpose, choices, daydreaming","lack of purpose, diversion, confusion",2
+43,Eight of Cups,2,7,"walking away, disillusionment, leaving behind","avoidance, fear of change, fear of loss",2
+44,Nine of Cups,2,8,"satisfaction, emotional stability, luxury","lack of inner joy, smugness, dissatisfaction",2
+45,Ten of Cups,2,9,"inner happiness, fulfillment, dreams coming true","shattered dreams, broken family, domestic disharmony",2
+46,Page of Cups,2,10,"happy surprise, dreamer, sensitivity","emotional immaturity, insecurity, disappointment",2
+47,Knight of Cups,2,11,"following the heart, idealist, romantic","moodiness, disappointment",2
+48,Queen of Cups,2,12,"compassion, calm, comfort","martyrdom, insecurity, dependence",2
+49,King of Cups,2,13,"compassion, control, balance","coldness, moodiness, bad advice",2
+50,Ace of Swords,3,0,"breakthrough, clarity, sharp mind","confusion, brutality, chaos",3
+51,Two of Swords,3,1,"difficult choices, indecision, stalemate","lesser of two evils, no right choice, confusion",3
+52,Three of Swords,3,2,"heartbreak, suffering, grief","recovery, forgiveness, moving on",3
+53,Four of Swords,3,3,"rest, restoration, contemplation","restlessness, burnout, stress",3
+54,Five of Swords,3,4,"unbridled ambition, win at all costs, sneakiness","lingering resentment, desire to reconcile, forgiveness",3
+55,Six of Swords,3,5,"transition, leaving behind, moving on","emotional baggage, unresolved issues, resisting transition",3
+56,Seven of Swords,3,6,"deception, trickery, tactics and strategy","coming clean, rethinking approach, deception",3
+57,Eight of Swords,3,7,"imprisonment, entrapment, self-victimization","self acceptance, new perspective, freedom",3
+58,Nine of Swords,3,8,"anxiety, hopelessness, trauma","hope, reaching out, despair",3
+59,Ten of Swords,3,9,"failure, collapse, defeat","can't get worse, only upwards, inevitable end",3
+60,Page of Swords,3,10,"curiosity, restlessness, mental energy","deception, manipulation, all talk",3
+61,Knight of Swords,3,11,"action, impulsiveness, defending beliefs","no direction, disregard for consequences, unpredictability",3
+62,Queen of Swords,3,12,"complexity, perceptiveness, clear mindedness","cold hearted, cruel, bitterness",3
+63,King of Swords,3,13,"head over heart, discipline, truth","manipulative, cruel, weakness",3
+64,Ace of Pentacles,4,0,"opportunity, prosperity, new venture","lost opportunity, missed chance, bad investment",4
+65,Two of Pentacles,4,1,"balancing decisions, priorities, adapting to change","loss of balance, disorganized, overwhelmed",4
+66,Three of Pentacles,4,2,"teamwork, collaboration, building","lack of teamwork, disorganized, group conflict",4
+67,Four of Pentacles,4,3,"conservation, frugality, security","greediness, stinginess, possessiveness",4
+68,Five of Pentacles,4,4,"need, poverty, insecurity","recovery, charity, improvement",4
+69,Six of Pentacles,4,5,"charity, generosity, sharing","strings attached, stinginess, power and domination",4
+70,Seven of Pentacles,4,6,"hard work, perseverance, diligence","work without results, distractions, lack of rewards",4
+71,Eight of Pentacles,4,7,"apprenticeship, passion, high standards","lack of passion, uninspired, no motivation",4
+72,Nine of Pentacles,4,8,"fruits of labor, rewards, luxury","reckless spending, living beyond means, false success",4
+73,Ten of Pentacles,4,9,"legacy, culmination, inheritance","fleeting success, lack of stability, lack of resources",4
+74,Page of Pentacles,4,10,"ambition, desire, diligence","lack of commitment, greediness, laziness",4
+75,Knight of Pentacles,4,11,"efficiency, hard work, responsibility","laziness, obsessiveness, work without reward",4
+76,Queen of Pentacles,4,12,"practicality, creature comforts, financial security","self-centeredness, jealousy, smothering",4
+77,King of Pentacles,4,13,"abundance, prosperity, security","greed, indulgence, sensuality",4
