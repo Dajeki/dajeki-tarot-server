@@ -1,6 +1,6 @@
 import { QueryConfig } from 'pg';
 
-function queryCardByElement( elementType : TarotElements ) : QueryConfig<TarotElements[]> {
+export function queryCardByElement( elementType : TarotElements ) : QueryConfig<TarotElements[]> {
 	
 	return {
 		text: 
@@ -20,7 +20,7 @@ function queryCardByElement( elementType : TarotElements ) : QueryConfig<TarotEl
 	} 
 }
 
-function queryCardBySuit( suitType : TarotSuits ) : QueryConfig<TarotSuits[]> {
+export function queryCardBySuit( suitType : TarotSuits ) : QueryConfig<TarotSuits[]> {
 	
 	return {
 		text: 

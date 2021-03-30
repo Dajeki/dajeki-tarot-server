@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: "../../.env" });
 
-function syncCSVParse(fileName: string): Promise<ITarotCSVRow[]> {
+function promisfiedCSVParse(fileName: string): Promise<ITarotCSVRow[]> {
 	const results: ITarotCSVRow[] = [];
 
 	return new Promise((resolve, reject) => {
@@ -33,7 +33,7 @@ function syncCSVParse(fileName: string): Promise<ITarotCSVRow[]> {
 }
 
 async function insertCardsIntoDB() {
-	let cards = await syncCSVParse("Tarot.csv");
+	let cards = await promisfiedCSVParse("Tarot.csv");
 
 	console.log(process.env.DATABASE_URL);
 	const client = new Client({
