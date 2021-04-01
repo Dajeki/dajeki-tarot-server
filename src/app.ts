@@ -1,87 +1,127 @@
-import express, { Router } from 'express';
-import { Client } from 'pg';
-import {queryCardByElement} from './pq-db-queries';
-import { IdTokenClient, OAuth2Client, TokenInfo, TokenPayload } from 'google-auth-library';
-import cors from 'cors';
+import express from "express";
+import { Client, Pool } from "pg";
+import { OAuth2Client, TokenPayload } from "google-auth-library";
+import cors from "cors";
+
+import { getRandomInt } from "./utils/get-random-integer";
+import { queryCardByElement, queryCardByID } from "./pq-db-queries";
 
 // rest of the code remains same
 const app = express();
 
 const options: cors.CorsOptions = {
 	allowedHeaders: [
-	  'Origin',
-	  'X-Requested-With',
-	  'Content-Type',
-	  'Accept',
-	  'X-Access-Token',
-	  'Authorization'
+		"Origin",
+		"X-Requested-With",
+		"Content-Type",
+		"Accept",
+		"X-Access-Token",
+		"Authorization"
 	],
 	credentials: true,
-	methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
+	methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
 	origin: "http://localhost:3000",
-	preflightContinue: false,
-  };
+	preflightContinue: false
+};
 
 app.use(cors(options));
 
 const PORT = 8080;
-const googleClientId = '914582580489-tms667vjlg9nq2n7c2rkjfbadsk2bsrp.apps.googleusercontent.com'
+const googleClientId =
+	"914582580489-tms667vjlg9nq2n7c2rkjfbadsk2bsrp.apps.googleusercontent.com";
 
 const client = new OAuth2Client(googleClientId);
 
-let a = 54;
-
-app.get('/', (req, res) => {
-
-	(async function() {
-
-		const client = new Client({
-				connectionString: process.env.DATABASE_URL,
-				ssl: {
-					rejectUnauthorized: false
-				} 
-			});
-			
-			client.connect();
-	
-			let queryResults = await client.query( queryCardByElement('fire'));
-	
-			for (let row of queryResults.rows) {
-				console.log(row);
-			}
-				
-			client.end();
-	
-			res.send(`Express + TypeScript Server`);
-
-	})();
-	
+const dbConnectionPool = new Pool({
+	connectionString: process.env.DATABASE_URL,
+	ssl: {
+		rejectUnauthorized: false
+	}
 });
 
-app.get('/getLogonInfo', (req, res) => {
+// app.get("/", (req, res) => {
+// 	(async function () {
+// 		const client = await dbConnectionPool.connect();
 
-	(async function() {
+// 		try {
+// 			let queryResults = await client.query(queryCardByElement("fire"));
+// 			for (let row of queryResults.rows) {
+// 				console.log(row);
+// 			}
+// 		} finally {
+// 			client.release();
+// 		}
 
-		const ticket = await client.verifyIdToken({
-			idToken: req.headers.authorization?.split(' ')[1] || '',
-			audience: googleClientId
-		})
+// 		res.send(`Express + TypeScript Server`);
+// 	})();
+// });
 
-		const payload : TokenPayload | undefined = ticket.getPayload();
-		console.log('payload:', payload);
+/*
+ * Cards db access
+ */
+app.get("/cards/:amount", (req, res) => {
+	(async function () {
+		const client = await dbConnectionPool.connect();
+		console.log(req.params.amount)
 
-		console.log(`User ${payload?.name} verified`);
+		const requestAmount = parseInt(req.params.amount);
+		let randomSelectedCards: number[] = [];
+		let numbersToChooseFrom: number[] = Array(78).fill(0); // numbers 0 - 77 as keys
 
-		const { sub , email, name, picture } = payload as TokenPayload;
-		const userId = sub;
-		// res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-		// res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-		res.send(`${userId}\n${email}\n${name}\n<img src="${picture}"/>`);
+		let numSelectedToRemove: number;
 
+		for (let i = 0; i < requestAmount; i++) {
+			numSelectedToRemove = getRandomInt(numbersToChooseFrom.length);
+			randomSelectedCards.push(numSelectedToRemove);
+
+			//remove the currently selected number from the list of available numbers
+			delete numbersToChooseFrom[numSelectedToRemove];
+		}
+
+		let QueryParamsForID = queryCardByID(requestAmount, randomSelectedCards);
+		console.log(QueryParamsForID);
+
+		if (QueryParamsForID !== undefined) {
+			try {
+				let queryResults = await client.query(QueryParamsForID);
+				for (let row of queryResults.rows) {
+					console.log(row);
+				}
+
+				res.setHeader("content-type", "application/json; charset=utf-8");
+				res.send(JSON.stringify(queryResults.rows));
+
+			} finally {
+		 		client.release();
+			}		
+		}
+		
 	})();
-	
-})
+});
+
+app.get("/userInfo/login", (req, res) => {
+	(async function () {
+		try {
+			const ticket = await client.verifyIdToken({
+				idToken: req.headers.authorization?.split(" ")[1] || "",
+				audience: googleClientId
+			});
+
+			const payload: TokenPayload | undefined = ticket.getPayload();
+
+			console.log("payload:", payload);
+			console.log(`User ${payload?.name} verified`);
+
+			const { sub, email, name, picture } = payload as TokenPayload;
+			const userId = sub;
+
+			res.send(`${userId}\n${email}\n${name}\n<img src="${picture}"/>`);
+		} catch {
+			res.send("Login Information Malformed");
+		}
+	})();
+});
 
 app.listen(PORT, () => {
-  console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
+	console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
 });
