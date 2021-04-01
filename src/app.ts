@@ -78,7 +78,7 @@ app.get("/cards/:amount", (req, res) => {
 			delete numbersToChooseFrom[numSelectedToRemove];
 		}
 
-		let QueryParamsForID = queryCardByID(requestAmount, randomSelectedCards);
+		let QueryParamsForID = queryCardByID(new Set(randomSelectedCards));
 		console.log(QueryParamsForID);
 
 		if (QueryParamsForID !== undefined) {
