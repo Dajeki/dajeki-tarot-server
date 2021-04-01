@@ -27,6 +27,15 @@ const options: cors.CorsOptions = {
 
 app.use(cors(options));
 
+const limiter = rateLimit({
+	windowMs: 60 * 1000, //1 Minute
+	max: 5,
+	message: "Too many calls to this endpoint. You are limited to 5 per minute."
+});
+
+//Subscribe the rate limiter middleware for random cards endpoint
+app.use("/cards/:amount", limiter);
+
 const PORT = 8080;
 const googleClientId =
 	"914582580489-tms667vjlg9nq2n7c2rkjfbadsk2bsrp.apps.googleusercontent.com";
@@ -40,32 +49,10 @@ const dbConnectionPool = new Pool({
 	}
 });
 
-// app.get("/", (req, res) => {
-// 	(async function () {
-// 		const client = await dbConnectionPool.connect();
 
-// 		try {
-// 			let queryResults = await client.query(queryCardByElement("fire"));
-// 			for (let row of queryResults.rows) {
-// 				console.log(row);
-// 			}
-// 		} finally {
-// 			client.release();
-// 		}
-
-// 		res.send(`Express + TypeScript Server`);
-// 	})();
-// });
-
-const limiter = rateLimit({
-	windowMs: 60 * 1000, //1 Minute
-	max: 5,
-	message: "Too many calls to this endpoint. You are limited to 5 per minute."
-});
-
-app.use("/cards/:amount", limiter);
-/*
- * Cards db access
+/**
+ * Cards db access.
+ * :amount - should be the number of random cards you would like returned.
  */
 app.get("/cards/:amount", (req, res) => {
 	(async function () {
@@ -78,6 +65,7 @@ app.get("/cards/:amount", (req, res) => {
 
 		let numSelectedToRemove: number;
 
+		//Get a random ID from the numbersToChooseFrom, remove it, and place it into randomSelectedCards
 		for (let i = 0; i < requestAmount; i++) {
 			numSelectedToRemove = getRandomInt(numbersToChooseFrom.length);
 			randomSelectedCards.push(numSelectedToRemove);
@@ -87,7 +75,6 @@ app.get("/cards/:amount", (req, res) => {
 		}
 
 		let QueryParamsForID = queryCardByID(new Set(randomSelectedCards));
-		console.log(QueryParamsForID);
 
 		if (QueryParamsForID !== undefined) {
 			try {
@@ -131,3 +118,20 @@ app.get("/userInfo/login", (req, res) => {
 app.listen(PORT, () => {
 	console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
 });
+
+// app.get("/", (req, res) => {
+// 	(async function () {
+// 		const client = await dbConnectionPool.connect();
+
+// 		try {
+// 			let queryResults = await client.query(queryCardByElement("fire"));
+// 			for (let row of queryResults.rows) {
+// 				console.log(row);
+// 			}
+// 		} finally {
+// 			client.release();
+// 		}
+
+// 		res.send(`Express + TypeScript Server`);
+// 	})();
+// });
