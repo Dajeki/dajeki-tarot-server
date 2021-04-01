@@ -1,10 +1,11 @@
 import express from "express";
-import { Client, Pool } from "pg";
+import { Pool } from "pg";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import cors from "cors";
 
 import { getRandomInt } from "./utils/get-random-integer";
-import { queryCardByElement, queryCardByID } from "./pq-db-queries";
+import { queryCardByID } from "./pq-db-queries";
+import rateLimit from "express-rate-limit";
 
 // rest of the code remains same
 const app = express();
@@ -56,13 +57,20 @@ const dbConnectionPool = new Pool({
 // 	})();
 // });
 
+const limiter = rateLimit({
+	windowMs: 60 * 1000, //1 Minute
+	max: 5,
+	message: "Too many calls to this endpoint. You are limited to 5 per minute."
+});
+
+app.use("/cards/:amount", limiter);
 /*
  * Cards db access
  */
 app.get("/cards/:amount", (req, res) => {
 	(async function () {
 		const client = await dbConnectionPool.connect();
-		console.log(req.params.amount)
+		console.log(req.params.amount);
 
 		const requestAmount = parseInt(req.params.amount);
 		let randomSelectedCards: number[] = [];
@@ -90,12 +98,10 @@ app.get("/cards/:amount", (req, res) => {
 
 				res.setHeader("content-type", "application/json; charset=utf-8");
 				res.send(JSON.stringify(queryResults.rows));
-
 			} finally {
-		 		client.release();
-			}		
+				client.release();
+			}
 		}
-		
 	})();
 });
 
