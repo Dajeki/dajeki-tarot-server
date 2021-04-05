@@ -8,7 +8,7 @@
   },
   "scripts": {
     "__devStartOLD__": "nodemon ./src/app.ts",
-    "devStart": "nodemon --exec \"heroku local web\" --signal SIGTERM",
+    "devStart": "nodemon -e ts --exec \"tsc && heroku local web\" || exit 1",
     "start": "node ./build/app.js",
     "build": "tsc",
     "postinstall": "tsc",

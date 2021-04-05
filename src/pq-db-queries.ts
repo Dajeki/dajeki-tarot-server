@@ -1,5 +1,9 @@
 import { QueryConfig } from 'pg';
 
+/**
+ * @param {TarotElement} elementType - Element type enum for tarot cards corresponding to Fire,Water,Air,Earth
+ * @return {QueryConfig<TarotSuits[]> | undefined} Query Config object for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with 	   	 supplied tarot element parameter and query constrained to a specific element.
+ */ 
 export function queryCardByElement( elementType : TarotElements ) : QueryConfig<TarotElements[]> {
 	return {
 		text: `SELECT  
@@ -18,6 +22,10 @@ export function queryCardByElement( elementType : TarotElements ) : QueryConfig<
 	} 
 }
 
+/**
+ * @param {TarotSuits} suitType - Suit type enum for tarot cards corresponding to Wands,Cups,Swords,Pentacles,Aether
+ * @return {QueryConfig<TarotSuits[]> | undefined} Query Config object for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with 	   	 supplied tarot suit parameter and query constrained to a specific suit.
+ */ 
 export function queryCardBySuit( suitType : TarotSuits ) : QueryConfig<TarotSuits[]> {	
 	return {
 		text:`SELECT  
@@ -38,18 +46,9 @@ export function queryCardBySuit( suitType : TarotSuits ) : QueryConfig<TarotSuit
 
 /**
  * @param {Set<number>} cardIds - An set of card ID's to have been selected
- * @return {QueryConfig<number[]> | undefined} Query Config object for {@link https://www.npmjs.com/package/pg|postgres (pg)} library
+ * @return {QueryConfig<number[]> | undefined} Query Config object for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with a 	   	 supplied set of numbers between 0-77 to query from the db.
  */ 
-export function queryCardByID( cardIds : Set<number> ) : QueryConfig<number[]> | undefined {
-
-	try{
-		if( cardIds.size <= 0 ) throw new Error("Cannot send an empty array.");
-		if( cardIds.size  > 78 ) throw new Error("You cannot possibly select more than 78 cards as that is the max in the deck.");
-	}
-	catch(err) {
-		console.log(err);
-		return undefined;
-	}
+export function queryCardByID( cardIds : Set<number> ) : QueryConfig<number[]> {	
 
 	let queryString = `SELECT
 			public.cards.card_name,

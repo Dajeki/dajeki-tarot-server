@@ -3,14 +3,14 @@ import { Pool } from "pg";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import cors from "cors";
 
-import { getRandomInt } from "./utils/get-random-integer";
+import { returnRandomSelectedSet } from "./utils/return-random-selected-set";
 import { queryCardByID } from "./pq-db-queries";
 import rateLimit from "express-rate-limit";
 
 // rest of the code remains same
 const app = express();
 
-const options: cors.CorsOptions = {
+const optionsCors: cors.CorsOptions = {
 	allowedHeaders: [
 		"Origin",
 		"X-Requested-With",
@@ -25,16 +25,16 @@ const options: cors.CorsOptions = {
 	preflightContinue: false
 };
 
-app.use(cors(options));
+app.use(cors(optionsCors));
 
-const limiter = rateLimit({
+const optionsLimiter: rateLimit.Options = {
 	windowMs: 60 * 1000, //1 Minute
 	max: 5,
 	message: "Too many calls to this endpoint. You are limited to 5 per minute."
-});
+};
 
 //Subscribe the rate limiter middleware for random cards endpoint
-app.use("/cards/:amount", limiter);
+app.use("/cards/:amount", rateLimit(optionsLimiter));
 
 const PORT = 8080;
 const googleClientId =
@@ -49,49 +49,42 @@ const dbConnectionPool = new Pool({
 	}
 });
 
-
 /**
  * Cards db access.
- * :amount - should be the number of random cards you would like returned.
+ * :amount - should be the number of random cards you would like returned. 
+ * request is returned as as application/json
  */
 app.get("/cards/:amount", (req, res) => {
 	(async function () {
-		const client = await dbConnectionPool.connect();
-		console.log(req.params.amount);
-
 		const requestAmount = parseInt(req.params.amount);
-		let randomSelectedCards: number[] = [];
-		let numbersToChooseFrom: number[] = Array(78).fill(0); // numbers 0 - 77 as keys
-
-		let numSelectedToRemove: number;
-
-		//Get a random ID from the numbersToChooseFrom, remove it, and place it into randomSelectedCards
-		for (let i = 0; i < requestAmount; i++) {
-			numSelectedToRemove = getRandomInt(numbersToChooseFrom.length);
-			randomSelectedCards.push(numSelectedToRemove);
-
-			//remove the currently selected number from the list of available numbers
-			delete numbersToChooseFrom[numSelectedToRemove];
+		if (requestAmount > 78) {
+			res.send('{ "error" : "There are only 78 cards in a Tarot Deck."}');
+			return;
+		} else if (requestAmount < 1) {
+			res.send('{ "error" : "Please ask for at least 1 card."}');
+			return;
 		}
 
-		let QueryParamsForID = queryCardByID(new Set(randomSelectedCards));
+		const dbClient = await dbConnectionPool.connect();
 
-		if (QueryParamsForID !== undefined) {
-			try {
-				let queryResults = await client.query(QueryParamsForID);
-				for (let row of queryResults.rows) {
-					console.log(row);
-				}
+		let QueryParamsForID = queryCardByID(returnRandomSelectedSet(requestAmount));
+		let queryResults = await dbClient.query(QueryParamsForID);
 
-				res.setHeader("content-type", "application/json; charset=utf-8");
-				res.send(JSON.stringify(queryResults.rows));
-			} finally {
-				client.release();
-			}
-		}
+		dbClient.release();
+
+		console.log(`\nReturned ${queryResults.rows.length} rows.`);
+
+		res.setHeader("content-type", "application/json; charset=utf-8");
+		res.send(JSON.stringify(queryResults.rows));
+
 	})();
 });
 
+/**
+ * Login endpoint
+ * Currently verifies only Google 0Auth2 JWT -  https://developers.google.com/identity/sign-in/web/backend-auth#verify-the-integrity-of-the-id-token
+ * TODO: maintain sub and full name in the backend for tarot spread information retreival in the frontend.
+ */
 app.get("/userInfo/login", (req, res) => {
 	(async function () {
 		try {
