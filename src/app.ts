@@ -7,7 +7,6 @@ import { returnRandomSelectedSet } from "./utils/return-random-selected-set";
 import { queryCardByID } from "./pq-db-queries";
 import rateLimit from "express-rate-limit";
 
-// rest of the code remains same
 const app = express();
 
 const optionsCors: cors.CorsOptions = {
