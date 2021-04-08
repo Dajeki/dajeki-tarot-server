@@ -1,0 +1,104 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 12,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "rules": {
+        "indent": [
+            "error",
+            "tab"
+        ],
+        "linebreak-style": [
+            "error",
+            "windows"
+        ],
+        "quotes": [
+            "error",
+            "double"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+		"comma-dangle": [
+			"error",
+			"always-multiline"
+		],
+
+		"no-var": "error",
+		"one-var-declaration-per-line": [
+			"error", 
+			"always"
+		],
+
+		"no-trailing-spaces": "error",
+		"no-dupe-args": "error",
+		"no-dupe-keys": "error",
+
+		"prefer-template": "error",
+		"template-tag-spacing": "error",
+
+		"block-spacing": [
+			"error",
+			"always"
+		],
+		"brace-style": [
+			"error",
+			"stroustrup",
+			{ "allowSingleLine" : true}
+		],
+		"space-in-parens": [
+			"error", 
+			"always",
+			{ 
+				"exceptions": ["()", "empty"] 
+			}
+		],
+		"space-before-function-paren": [
+			"error", 
+			{
+				"anonymous": "always",
+				"named": "never",
+				"asyncArrow": "always"
+			}
+		],
+		"func-call-spacing": [
+			"error",
+			"never"
+		],
+		"space-before-blocks": [
+			"error", 
+			"always"
+		],
+		"object-curly-spacing": [
+			"error",
+			"always", 
+			{ 
+				"objectsInObjects": false,
+				"arraysInObjects": false 
+			}
+		],
+		"no-extra-boolean-cast": [
+			"error", 
+			{"enforceForLogicalOperands": true}
+		],
+		"curly": [
+			"error", 
+			"multi-line"
+		],
+		"use-isnan": "error",
+		"template-curly-spacing": ["error", "always"]
+    }
+}
