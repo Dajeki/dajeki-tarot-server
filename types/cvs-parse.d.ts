@@ -1,4 +1,4 @@
-type ITarotCSVRow = { 
+type ITarotCSVRow = {
 	id			?: string,
 	suitId		?: string,
 	name		?: string,

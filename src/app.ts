@@ -18,9 +18,9 @@ const optionsCors: cors.CorsOptions = {
 		"X-Access-Token",
 		"Authorization",
 	],
-	credentials: true,
-	methods: "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
-	origin: "http://localhost:3000",
+	credentials      : true,
+	methods          : "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
+	origin           : "http://localhost:3000",
 	preflightContinue: false,
 };
 
@@ -28,25 +28,24 @@ app.use( cors( optionsCors ));
 
 const optionsLimiter: rateLimit.Options = {
 	windowMs: 60 * 1000, //1 Minute
-	max: 5,
-	message: "Too many calls to this endpoint. You are limited to 5 per minute.",
+	max     : 5,
+	message : "Too many calls to this endpoint. You are limited to 5 per minute.",
 };
 
 //Subscribe the rate limiter middleware for random cards endpoint
 app.use( "/cards/:amount", rateLimit( optionsLimiter ));
 
 const PORT = 8080;
-const googleClientId =
-	"914582580489-tms667vjlg9nq2n7c2rkjfbadsk2bsrp.apps.googleusercontent.com";
+const googleClientId = "914582580489-tms667vjlg9nq2n7c2rkjfbadsk2bsrp.apps.googleusercontent.com";
 
 const client = new OAuth2Client( googleClientId );
 
-const dbConnectionPool = new Pool( {
+const dbConnectionPool = new Pool({
 	connectionString: process.env.DATABASE_URL,
-	ssl: {
+	ssl             : {
 		rejectUnauthorized: false,
 	},
-} );
+});
 
 /**
  * Cards db access.
@@ -67,8 +66,8 @@ app.get( "/cards/:amount", ( req, res ) => {
 
 		const dbClient = await dbConnectionPool.connect();
 
-		const QueryParamsForID = queryCardByID( returnRandomSelectedSet( requestAmount ));
-		const queryResults = await dbClient.query( QueryParamsForID );
+		const queryParamsForID = queryCardByID( returnRandomSelectedSet( requestAmount ));
+		const queryResults = await dbClient.query( queryParamsForID );
 
 		dbClient.release();
 
@@ -76,10 +75,11 @@ app.get( "/cards/:amount", ( req, res ) => {
 
 		res.setHeader( "content-type", "application/json; charset=utf-8" );
 		res.send( JSON.stringify( queryResults.rows ));
+	})();
+});
 
-	} )();
-} );
-
+const LetsTryThis = 0;
+console.log( LetsTryThis );
 /**
  * Login endpoint
  * Currently verifies only Google 0Auth2 JWT -  https://developers.google.com/identity/sign-in/web/backend-auth#verify-the-integrity-of-the-id-token
@@ -88,10 +88,10 @@ app.get( "/cards/:amount", ( req, res ) => {
 app.get( "/userInfo/login", ( req, res ) => {
 	( async function () {
 		try {
-			const ticket = await client.verifyIdToken( {
-				idToken: req.headers.authorization?.split( " " )[1] || "",
+			const ticket = await client.verifyIdToken({
+				idToken : req.headers.authorization?.split( " " )[1] || "",
 				audience: googleClientId,
-			} );
+			});
 
 			const payload: TokenPayload | undefined = ticket.getPayload();
 
@@ -106,9 +106,9 @@ app.get( "/userInfo/login", ( req, res ) => {
 		catch {
 			res.send( "Login Information Malformed" );
 		}
-	} )();
-} );
+	})();
+});
 
 app.listen( PORT, () => {
 	console.log( `⚡️[server]: Server is running at https://localhost:${ PORT }` );
-} );
+});

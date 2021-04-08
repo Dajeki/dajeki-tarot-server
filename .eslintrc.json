@@ -28,16 +28,36 @@
             "error",
             "double"
         ],
+
         "semi": [
             "error",
             "always"
         ],
+
+		"semi-spacing": [
+			"error", 
+			{ 
+				"before": false, 
+				"after": true 
+			}
+		],
+
 		"comma-dangle": [
 			"error",
 			"always-multiline"
 		],
+		"comma-spacing": [
+			"error", 
+			{ 
+				"before": false, 
+				"after": true 
+			}
+		],
 
 		"no-var": "error",
+		"prefer-const": "error",
+		"camelcase": "error",
+
 		"one-var-declaration-per-line": [
 			"error", 
 			"always"
@@ -63,7 +83,7 @@
 			"error", 
 			"always",
 			{ 
-				"exceptions": ["()", "empty"] 
+				"exceptions": ["{}","()", "empty"] 
 			}
 		],
 		"space-before-function-paren": [
@@ -89,6 +109,10 @@
 				"objectsInObjects": false,
 				"arraysInObjects": false 
 			}
+		],
+		"key-spacing": [
+			"error", 
+			{"align": "colon"}
 		],
 		"no-extra-boolean-cast": [
 			"error", 
