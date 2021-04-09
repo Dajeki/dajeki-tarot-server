@@ -36,7 +36,7 @@ const optionsLimiter: rateLimit.Options = {
 app.use( "/cards/:amount", rateLimit( optionsLimiter ));
 
 const PORT = 8080;
-const googleClientId = "914582580489-tms667vjlg9nq2n7c2rkjfbadsk2bsrp.apps.googleusercontent.com";
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
 
 const client = new OAuth2Client( googleClientId );
 
@@ -78,8 +78,6 @@ app.get( "/cards/:amount", ( req, res ) => {
 	})();
 });
 
-const LetsTryThis = 0;
-console.log( LetsTryThis );
 /**
  * Login endpoint
  * Currently verifies only Google 0Auth2 JWT -  https://developers.google.com/identity/sign-in/web/backend-auth#verify-the-integrity-of-the-id-token

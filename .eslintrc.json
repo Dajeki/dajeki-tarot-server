@@ -42,6 +42,8 @@
 			}
 		],
 
+		"no-extra-semi": "error",
+
 		"comma-dangle": [
 			"error",
 			"always-multiline"
@@ -98,6 +100,11 @@
 			"error",
 			"never"
 		],
+		"wrap-iife": [
+			"error", 
+			"inside"
+		],
+
 		"space-before-blocks": [
 			"error", 
 			"always"
@@ -110,6 +117,9 @@
 				"arraysInObjects": false 
 			}
 		],
+
+		"dot-notation": "error",
+
 		"key-spacing": [
 			"error", 
 			{"align": "colon"}
