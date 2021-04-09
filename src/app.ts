@@ -4,7 +4,7 @@ import { OAuth2Client, TokenPayload } from "google-auth-library";
 import cors from "cors";
 
 import { returnRandomSelectedSet } from "./utils/return-random-selected-set";
-import { queryCardByID } from "./pq-db-queries";
+import { queryCardByID, upsertUser } from "./pq-db-queries";
 import rateLimit from "express-rate-limit";
 
 const app = express();
@@ -56,7 +56,9 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 	 */
 	app.get( "/cards/:amount", ( req, res ) => {
 		( async function () {
+
 			const requestAmount = parseInt( req.params.amount );
+
 			if ( requestAmount > 78 ) {
 				res.send( "{ \"error\": \"There are only 78 cards in a Tarot Deck.\"}" );
 				return;
@@ -84,7 +86,10 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 	 */
 	app.get( "/userInfo/login", ( req, res ) => {
 		( async function () {
+
+			const dbClient = await dbConnectionPool.connect();
 			try {
+
 				const ticket = await client.verifyIdToken({
 					idToken : req.headers.authorization?.split( " " )[1] || "",
 					audience: GOOGLE_CLIENT_ID,
@@ -95,13 +100,27 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 				console.log( "payload:", payload );
 				console.log( `User ${ payload?.name } verified` );
 
-				const { sub, email, name, picture } = payload as TokenPayload;
-				const userId = sub;
+				const { sub : userId, email, name = "", picture } = payload as TokenPayload;
+				const [queryUpdateUser, queryInsertUser] = upsertUser({ username: name, id: userId });
+
+				const updateQueryResults = await dbClient.query( queryUpdateUser );
+				console.log( "Rows affected from update:", updateQueryResults.rowCount );
+
+				if ( updateQueryResults.rowCount <= 0 ) {
+
+					const insertQueryResults = await dbClient.query( queryInsertUser );
+					console.log( "Rows affected from insert:", insertQueryResults.rowCount );
+
+				}
 
 				res.send( `${ userId }\n${ email }\n${ name }\n<img src="${ picture }"/>` );
+
 			}
-			catch {
-				res.send( "Login Information Malformed" );
+			catch( err ) {
+				res.send( `Login Error\n${ err }` );
+			}
+			finally {
+				dbClient.release();
 			}
 		})();
 	});
