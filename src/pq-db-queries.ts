@@ -65,9 +65,12 @@ export function queryCardByID( cardIds : Set<number> ) : QueryConfig<number[]> {
 
 	//start iterator at one as it is included in the origional queryString.
 	for( let i = 1; i < cardIds.size; ) {
-		queryString += ` OR public.cards.id = ${ ++i }`;
+		queryString += ` OR public.cards.id = $${ ++i }`;
 	}
 	queryString += ";";
+
+	console.log( queryString );
+	console.log( ...cardIds.keys());
 
 	return {
 		text  : queryString,

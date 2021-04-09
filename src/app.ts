@@ -58,22 +58,19 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 		( async function () {
 			const requestAmount = parseInt( req.params.amount );
 			if ( requestAmount > 78 ) {
-				res.send( "{ \"error\" : \"There are only 78 cards in a Tarot Deck.\"}" );
+				res.send( "{ \"error\": \"There are only 78 cards in a Tarot Deck.\"}" );
 				return;
 			}
 			else if ( requestAmount < 1 ) {
-				res.send( "{ \"error\" : \"Please ask for at least 1 card.\"}" );
+				res.send( "{ \"error\": \"Please ask for at least 1 card.\"}" );
 				return;
 			}
 
 			const dbClient = await dbConnectionPool.connect();
-
 			const queryParamsForID = queryCardByID( returnRandomSelectedSet( requestAmount ));
 			const queryResults = await dbClient.query( queryParamsForID );
 
 			dbClient.release();
-
-			console.log( `\nReturned ${ queryResults.rows.length } rows.` );
 
 			res.setHeader( "content-type", "application/json; charset=utf-8" );
 			res.send( JSON.stringify( queryResults.rows ));
