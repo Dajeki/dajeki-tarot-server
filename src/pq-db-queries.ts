@@ -69,11 +69,31 @@ export function queryCardByID( cardIds : Set<number> ) : QueryConfig<number[]> {
 	}
 	queryString += ";";
 
-	console.log( queryString );
-	console.log( ...cardIds.keys());
-
 	return {
 		text  : queryString,
 		values: [...cardIds.keys()],
 	};
+}
+
+/**
+ * @param {DajekiTarotUser} DajekiTarotUser - An object containing the {username, id} properties.
+ * @param {username} DajekiTarotUser.username - Username is the full name supplied to Google OAuth
+ * @param {id} DajekiTarotUser.id - UUID(sub) supplied from the Google OAuth
+ * @return {QueryConfig<(string | number)[]>[]} Arry of Query Config objects for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with the first index(0) being the update query and the second index(1) being the insert.
+ */
+export function upsertUser({ username, id }: DajekiTarotUser ): QueryConfig<( string | number )[]>[] {
+
+	const queryStringUpdate = "UPDATE users SET username = $1 WHERE id = $2";
+	const queryStringInsert = "INSERT INTO users (id, username) VALUES ($1, $2)";
+
+	return [
+		{
+			text  : queryStringUpdate,
+			values: [username, id],
+		},
+		{
+			text  : queryStringInsert,
+			values: [id, username],
+		},
+	];
 }
