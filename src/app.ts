@@ -28,8 +28,8 @@ app.use( cors( optionsCors ));
 
 const optionsLimiter: rateLimit.Options = {
 	windowMs: 60 * 1000, //1 Minute
-	max     : 5,
-	message : "Too many calls to this endpoint. You are limited to 5 per minute.",
+	max     : 20,
+	message : "{\"error\": \"Too many calls to this endpoint. You are limited to 5 per minute.\"}",
 };
 
 //Subscribe the rate limiter middleware for random cards endpoint
@@ -60,11 +60,11 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 			const requestAmount = parseInt( req.params.amount );
 
 			if ( requestAmount > 78 ) {
-				res.send( "{ \"error\": \"There are only 78 cards in a Tarot Deck.\"}" );
+				res.json( "{ \"error\": \"There are only 78 cards in a Tarot Deck.\"}" );
 				return;
 			}
 			else if ( requestAmount < 1 ) {
-				res.send( "{ \"error\": \"Please ask for at least 1 card.\"}" );
+				res.json( "{ \"error\": \"Please ask for at least 1 card.\"}" );
 				return;
 			}
 
@@ -74,8 +74,7 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 			dbClient.release();
 
-			res.setHeader( "content-type", "application/json; charset=utf-8" );
-			res.send( JSON.stringify( queryResults.rows ));
+			res.json( queryResults.rows );
 		})();
 	});
 
@@ -117,7 +116,7 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 			}
 			catch( err ) {
-				res.send( `Login Error\n${ err }` );
+				res.json( `{ "error":${ err }` );
 			}
 			finally {
 				dbClient.release();
