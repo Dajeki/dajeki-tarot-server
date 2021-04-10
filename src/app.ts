@@ -67,6 +67,10 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 				res.json( "{ \"error\": \"Please ask for at least 1 card.\"}" );
 				return;
 			}
+			else if ( isNaN( requestAmount )) {
+				res.json( "{ \"error\": \"The request card amount is not a number.\"}" );
+				return;
+			}
 
 			const dbClient = await dbConnectionPool.connect();
 			const queryParamsForID = queryCardByID( returnRandomSelectedSet( requestAmount ));
