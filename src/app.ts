@@ -100,11 +100,10 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 				const payload: TokenPayload | undefined = ticket.getPayload();
 
-				console.log( "payload:", payload );
 				console.log( `User ${ payload?.name } verified` );
 
-				const { sub : userId, email, name = "", picture } = payload as TokenPayload;
-				const [queryUpdateUser, queryInsertUser] = upsertUser({ username: name, id: userId });
+				const { sub : userId, email, given_name = "", picture } = payload as TokenPayload;
+				const [queryUpdateUser, queryInsertUser] = upsertUser({ username: given_name, id: userId });
 
 				const updateQueryResults = await dbClient.query( queryUpdateUser );
 				console.log( "Rows affected from update:", updateQueryResults.rowCount );

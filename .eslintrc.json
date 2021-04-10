@@ -16,7 +16,7 @@
         "@typescript-eslint"
     ],
     "rules": {
-		"@typescript-eslint/no-explicit-any" : 1,
+		"@typescript-eslint/no-explicit-any" : 2,
         "indent": [
             "error",
             "tab"
@@ -59,7 +59,7 @@
 
 		"no-var": "error",
 		"prefer-const": "error",
-		"camelcase": "error",
+		"camelcase": "warn",
 
 		"one-var-declaration-per-line": [
 			"error", 
