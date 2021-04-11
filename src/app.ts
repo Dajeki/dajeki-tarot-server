@@ -1,5 +1,5 @@
 import express from "express";
-import { Pool } from "pg";
+import { Pool, QueryResult } from "pg";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import cors from "cors";
 
@@ -74,11 +74,21 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 			const dbClient = await dbConnectionPool.connect();
 			const queryParamsForID = queryCardByID( returnRandomSelectedSet( requestAmount ));
-			const queryResults = await dbClient.query( queryParamsForID );
+			const queryResults: QueryResult<CardDBResults> = await dbClient.query( queryParamsForID );
 
 			dbClient.release();
 
-			res.json( queryResults.rows );
+			const directionalCards: CardDBResults[] = queryResults.rows.map( element => {
+				if ( Math.random() * 10 >= 5 ) {
+					delete element.card_meaning_up;
+				}
+				else {
+					delete element.card_meaning_down;
+				}
+				return element;
+			});
+
+			res.json( directionalCards );
 		})();
 	});
 
@@ -114,11 +124,11 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 				}
 
-				res.send( `${ userId }\n${ email }\n${ name }\n<img src="${ picture }"/>` );
+				res.send( `${ userId }\n${ email }\n${ given_name }\n<img src="${ picture }"/>` );
 
 			}
 			catch( err ) {
-				res.json( `{ "error":${ err }` );
+				res.json( `{ "error":${ err }}` );
 			}
 			finally {
 				dbClient.release();
