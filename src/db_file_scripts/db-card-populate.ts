@@ -3,7 +3,7 @@ import fs from "fs";
 import { Client } from "pg";
 import dotenv from "dotenv";
 
-dotenv.config({ path: "../../.env" });
+// dotenv.config({ path: "../../.env" });
 
 function promisfiedCSVParse( fileName: string ): Promise<ITarotCSVRow[]> {
 	const results: ITarotCSVRow[] = [];
