@@ -5,16 +5,6 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: "../../.env" });
 
-interface ITarotCSVRow {
-	name     ?: string;
-	suitId   ?: string;
-	id       ?: string;
-	elementId?: string;
-	cardRank ?: string;
-	upright  ?: string;
-	down     ?: string;
-}
-
 function promisfiedCSVParse( fileName: string ): Promise<ITarotCSVRow[]> {
 	const results: ITarotCSVRow[] = [];
 

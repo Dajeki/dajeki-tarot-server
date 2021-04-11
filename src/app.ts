@@ -28,8 +28,8 @@ app.use( cors( optionsCors ));
 
 const optionsLimiter: rateLimit.Options = {
 	windowMs: 60 * 1000, //1 Minute
-	max     : 20,
-	message : "{\"error\": \"Too many calls to this endpoint. You are limited to 5 per minute.\"}",
+	max     : 100,
+	message : "{\"error\": \"Too many calls to this endpoint. You are limited to 100 per minute.\"}",
 };
 
 //Subscribe the rate limiter middleware for random cards endpoint
@@ -85,7 +85,6 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 	/**
 	 * Login endpoint
 	 * Currently verifies only Google 0Auth2 JWT -  https://developers.google.com/identity/sign-in/web/backend-auth#verify-the-integrity-of-the-id-token
-	 * TODO: maintain sub and full name in the backend for tarot spread information retreival in the frontend.
 	 */
 	app.get( "/userInfo/login", ( req, res ) => {
 		( async function () {
