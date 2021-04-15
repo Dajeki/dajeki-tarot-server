@@ -2,7 +2,7 @@ type TarotElements = "fire" | "water" | "air" | "earth";
 type TarotSuits = "wand" | "cup" | "sword" | "pentacle" | "aether";
 
 type CardDBResults = {
-	id: number,
+	id					: number,
 	suit_id				: number,
 	element_id			: number,
 	card_rank			: number,
