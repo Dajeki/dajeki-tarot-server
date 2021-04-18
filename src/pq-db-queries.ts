@@ -97,3 +97,22 @@ export function upsertUser({ username, id }: DajekiTarotUser ): QueryConfig<( st
 		},
 	];
 }
+
+/**
+ * @param {number[]} cardIds - An array of cardIds from the request body.
+ * @param {string} userId - sub UUID from the google OAuth
+ * @param {number} spreadId - spreadId from the request body json object.
+ * @param {string} spreadDirection - A string of 0 and 1's representing 1 for up or 0 for down.
+ * @return {QueryConfig<number[]> | undefined} Query Config object for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with required entry into the saved spreads db.
+ */
+export function saveCardSpread( cardIds : number[], userId : string, spreadId : number, spreadDirection: string  ) : QueryConfig<( string | number | Date )[]> {
+
+	const queryString = `INSERT INTO
+			public.user_draws(user_id, spread_meaning_id, card_one_id, card_two_id, card_three_id, date_drawn, direction)
+			VALUES ( $1 , $2, $3, $4, $5, $6, $7);`;
+
+	return {
+		text  : queryString,
+		values: [userId, spreadId, ...cardIds, new Date().toISOString(), spreadDirection ],
+	};
+}

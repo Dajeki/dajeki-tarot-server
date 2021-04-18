@@ -4,23 +4,16 @@ import { OAuth2Client, TokenPayload } from "google-auth-library";
 import cors from "cors";
 
 import { returnRandomSelectedSet } from "./utils/return-random-selected-set";
-import { queryCardByID, upsertUser } from "./pq-db-queries";
+import { queryCardByID, saveCardSpread, upsertUser } from "./pq-db-queries";
 import rateLimit from "express-rate-limit";
+//import { parseCookies } from "./utils/cookie-parser";
 
 const app = express();
 
 const optionsCors: cors.CorsOptions = {
-	allowedHeaders: [
-		"Origin",
-		"X-Requested-With",
-		"Content-Type",
-		"Accept",
-		"X-Access-Token",
-		"Authorization",
-	],
 	credentials      : true,
 	methods          : "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
-	origin           : "http://localhost:3000",
+	origin           : "https://localhost:3000",
 	preflightContinue: false,
 };
 
@@ -34,6 +27,7 @@ const optionsLimiter: rateLimit.Options = {
 
 //Subscribe the rate limiter middleware for random cards endpoint
 app.use( "/cards/:amount", rateLimit( optionsLimiter ));
+app.use( "/cards/save_spread", express.json());
 
 const PORT = parseInt( process.env.PORT || "0" );
 const { GOOGLE_CLIENT_ID, DATABASE_URL } = process.env;
@@ -101,9 +95,9 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 			const dbClient = await dbConnectionPool.connect();
 			try {
-
+				const JWT = req.headers.authorization?.split( " " )[1];
 				const ticket = await client.verifyIdToken({
-					idToken : req.headers.authorization?.split( " " )[1] || "",
+					idToken : JWT || "",
 					audience: GOOGLE_CLIENT_ID,
 				});
 
@@ -111,7 +105,9 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 				console.log( `User ${ payload?.name } verified` );
 
-				const { sub : userId, email, given_name = "", picture } = payload as TokenPayload;
+				//Sub is UUID, given_name is either hidden or Full name and exp is token expiration time
+				const { sub: userId, given_name = "", exp } = payload as TokenPayload;
+
 				const [queryUpdateUser, queryInsertUser] = upsertUser({ username: given_name, id: userId });
 
 				const updateQueryResults = await dbClient.query( queryUpdateUser );
@@ -124,11 +120,54 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 				}
 
-				res.send( `${ userId }\n${ email }\n${ given_name }\n<img src="${ picture }"/>` );
-
+				res.send( `Login sucessful for ${  given_name }` );
 			}
 			catch( err ) {
-				res.json( `{ "error":${ err }}` );
+				res.json({ error: err });
+			}
+			finally {
+				dbClient.release();
+			}
+		})();
+	});
+
+	/**
+	 * Save spread endpoint that will require the user to be logged in to use.
+	 * The request to this endpoint should be sent in JSON.
+	 */
+	app.put( "/cards/save_spread", ( req, res ) => {
+		( async function () {
+
+			const JWT = req.headers.authorization?.split( " " )[1] || "";
+			const ticket = await client.verifyIdToken({
+				idToken : JWT,
+				audience: GOOGLE_CLIENT_ID,
+			});
+			const payload: TokenPayload | undefined = ticket.getPayload();
+
+			const dbClient = await dbConnectionPool.connect();
+			try{
+				if ( payload == undefined ) {
+					throw new Error( "Sent JWT is incorrect" );
+				}
+				console.log( `User ${ payload.name } verified for saving spread.` );
+
+				const { sub: userId } = payload as TokenPayload;
+
+				console.log( req.body.cards, userId, req.body.spreadId, req.body.spreadDir );
+				const saveCardQuery = saveCardSpread( req.body.cards, userId, req.body.spreadId, req.body.spreadDir );
+				const updateQueryResults = await dbClient.query( saveCardQuery );
+
+				if ( updateQueryResults.rowCount === 0 ) {
+					res.send( "Could not save in DB" );
+				}
+
+				console.log( `Saved User ${ payload.name }'s Spread.` );
+				res.send( "Saved Spread!" );
+			}
+			catch ( err ) {
+				console.log( err );
+				res.json({ error: err });
 			}
 			finally {
 				dbClient.release();
@@ -138,7 +177,7 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 
 	app.listen( PORT, () => {
-		console.log( `⚡️[server]: Server is running at https://localhost:${ PORT }` );
+		console.log( `⚡️[server]: Server is running at http://localhost:${ PORT }` );
 	});
 
 }
