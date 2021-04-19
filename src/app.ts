@@ -133,7 +133,7 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 	/**
 	 * Save spread endpoint that will require the user to be logged in to use.
-	 * The request to this endpoint should be sent in JSON.
+	 * The request to this endpoint body should be sent in JSON as the body will be parsed as such.
 	 */
 	app.put( "/cards/save_spread", ( req, res ) => {
 		( async function () {
