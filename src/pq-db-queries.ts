@@ -4,7 +4,7 @@ import { QueryConfig } from "pg";
  * @param {TarotElement} elementType - Element type enum for tarot cards corresponding to Fire,Water,Air,Earth
  * @return {QueryConfig<TarotSuits[]> | undefined} Query Config object for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with 	   	 supplied tarot element parameter and query constrained to a specific element.
  */
-export function queryCardByElement( elementType : TarotElements ) : QueryConfig<TarotElements[]> {
+export function getCardByElementQueryGen( elementType : TarotElements ) : QueryConfig<TarotElements[]> {
 	return {
 		text: `SELECT  
 				public.cards.card_name
@@ -26,7 +26,7 @@ export function queryCardByElement( elementType : TarotElements ) : QueryConfig<
  * @param {TarotSuits} suitType - Suit type enum for tarot cards corresponding to Wands,Cups,Swords,Pentacles,Aether
  * @return {QueryConfig<TarotSuits[]> | undefined} Query Config object for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with 	   	 supplied tarot suit parameter and query constrained to a specific suit.
  */
-export function queryCardBySuit( suitType : TarotSuits ) : QueryConfig<TarotSuits[]> {
+export function getCardBySuitQueryGen( suitType : TarotSuits ) : QueryConfig<TarotSuits[]> {
 	return {
 		text: `SELECT  
 				public.cards.card_name,
@@ -48,7 +48,7 @@ export function queryCardBySuit( suitType : TarotSuits ) : QueryConfig<TarotSuit
  * @param {Set<number>} cardIds - An set of card ID's to have been selected
  * @return {QueryConfig<number[]> | undefined} Query Config object for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with a 	   	 supplied set of numbers between 0-77 to query from the db.
  */
-export function queryCardByID( cardIds : Set<number> ) : QueryConfig<number[]> {
+export function getCardsByIDQueryGen( cardIds : Set<number> ) : QueryConfig<number[]> {
 
 	let queryString = `SELECT
 			public.cards.card_name,
@@ -81,7 +81,7 @@ export function queryCardByID( cardIds : Set<number> ) : QueryConfig<number[]> {
  * @param {id} DajekiTarotUser.id - UUID(sub) supplied from the Google OAuth
  * @return {QueryConfig<(string | number)[]>[]} Arry of Query Config objects for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with the first index(0) being the update query and the second index(1) being the insert.
  */
-export function upsertUser({ username, id }: DajekiTarotUser ): QueryConfig<( string | number )[]>[] {
+export function upsertUserQueryGen({ username, id }: DajekiTarotUser ): QueryConfig<( string | number )[]>[] {
 
 	const queryStringUpdate = "UPDATE users SET username = $1 WHERE id = $2";
 	const queryStringInsert = "INSERT INTO users (id, username) VALUES ($1, $2)";
@@ -105,7 +105,7 @@ export function upsertUser({ username, id }: DajekiTarotUser ): QueryConfig<( st
  * @param {string} spreadDirection - A string of 0 and 1's representing 1 for up or 0 for down.
  * @return {QueryConfig<number[]> | undefined} Query Config object for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with required entry into the saved spreads db.
  */
-export function saveCardSpread( cardIds : number[], userId : string, spreadId : number, spreadDirection: string  ) : QueryConfig<( string | number | Date )[]> {
+export function saveCardSpreadQueryGen( cardIds : number[], userId : string, spreadId : number, spreadDirection: string  ) : QueryConfig<( string | number | Date )[]> {
 
 	const queryString = `INSERT INTO
 			public.user_draws(user_id, spread_meaning_id, card_one_id, card_two_id, card_three_id, date_drawn, direction)

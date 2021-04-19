@@ -4,7 +4,7 @@ import { OAuth2Client, TokenPayload } from "google-auth-library";
 import cors from "cors";
 
 import { returnRandomSelectedSet } from "./utils/return-random-selected-set";
-import { queryCardByID, saveCardSpread, upsertUser } from "./pq-db-queries";
+import { getCardsByIDQueryGen, saveCardSpreadQueryGen, upsertUserQueryGen } from "./pq-db-queries";
 import rateLimit from "express-rate-limit";
 //import { parseCookies } from "./utils/cookie-parser";
 
@@ -67,7 +67,7 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 			}
 
 			const dbClient = await dbConnectionPool.connect();
-			const queryParamsForID = queryCardByID( returnRandomSelectedSet( requestAmount ));
+			const queryParamsForID = getCardsByIDQueryGen( returnRandomSelectedSet( requestAmount ));
 			const queryResults: QueryResult<CardDBResults> = await dbClient.query( queryParamsForID );
 
 			dbClient.release();
@@ -90,12 +90,14 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 	 * Login endpoint
 	 * Currently verifies only Google 0Auth2 JWT -  https://developers.google.com/identity/sign-in/web/backend-auth#verify-the-integrity-of-the-id-token
 	 */
-	app.get( "/userInfo/login", ( req, res ) => {
+	app.post( "/userInfo/login", ( req, res ) => {
 		( async function () {
 
+			const JWT = req.headers.authorization?.split( " " )[1];
 			const dbClient = await dbConnectionPool.connect();
+
 			try {
-				const JWT = req.headers.authorization?.split( " " )[1];
+				//Error thrown here if JWT inccorect.
 				const ticket = await client.verifyIdToken({
 					idToken : JWT || "",
 					audience: GOOGLE_CLIENT_ID,
@@ -108,7 +110,7 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 				//Sub is UUID, given_name is either hidden or Full name and exp is token expiration time
 				const { sub: userId, given_name = "", exp } = payload as TokenPayload;
 
-				const [queryUpdateUser, queryInsertUser] = upsertUser({ username: given_name, id: userId });
+				const [queryUpdateUser, queryInsertUser] = upsertUserQueryGen({ username: given_name, id: userId });
 
 				const updateQueryResults = await dbClient.query( queryUpdateUser );
 				console.log( "Rows affected from update:", updateQueryResults.rowCount );
@@ -120,10 +122,13 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 				}
 
-				res.send( `Login sucessful for ${  given_name }` );
+				res.json({ success: `Login sucessful for ${ given_name }` });
 			}
-			catch( err ) {
-				res.json({ error: err });
+			catch ( err ) {
+
+				res.status( 401 )
+					.json({ error: ( err as Error ).message });
+
 			}
 			finally {
 				dbClient.release();
@@ -138,36 +143,44 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 	app.put( "/cards/save_spread", ( req, res ) => {
 		( async function () {
 
-			const JWT = req.headers.authorization?.split( " " )[1] || "";
-			const ticket = await client.verifyIdToken({
-				idToken : JWT,
-				audience: GOOGLE_CLIENT_ID,
-			});
-			const payload: TokenPayload | undefined = ticket.getPayload();
+			//Used to store the sub to be used between try catch blocks
+			let userId;
+			try {
+				const JWT = req.headers.authorization?.split( " " )[1] || "";
+				//Error thrown here if JWT inccorect.
+				const ticket = await client.verifyIdToken({
+					idToken : JWT,
+					audience: GOOGLE_CLIENT_ID,
+				});
+
+				const payload: TokenPayload | undefined = ticket.getPayload();
+				console.log( `User ${ payload?.name } verified for saving spread.` );
+
+				const { sub } = payload as TokenPayload;
+				userId = sub;
+			}
+			catch ( err ) {
+				res.status( 500 ).json({ error: "Not logged in or incorrect token sent with response." });
+				return;
+			}
 
 			const dbClient = await dbConnectionPool.connect();
-			try{
-				if ( payload == undefined ) {
-					throw new Error( "Sent JWT is incorrect" );
-				}
-				console.log( `User ${ payload.name } verified for saving spread.` );
+			try {
 
-				const { sub: userId } = payload as TokenPayload;
-
-				console.log( req.body.cards, userId, req.body.spreadId, req.body.spreadDir );
-				const saveCardQuery = saveCardSpread( req.body.cards, userId, req.body.spreadId, req.body.spreadDir );
+				const saveCardQuery = saveCardSpreadQueryGen( req.body.cards, userId, req.body.spreadId, req.body.spreadDir );
 				const updateQueryResults = await dbClient.query( saveCardQuery );
 
 				if ( updateQueryResults.rowCount === 0 ) {
-					res.send( "Could not save in DB" );
+					//Check to make sure the body is what we expected.
+					console.log( req.body.cards, userId, req.body.spreadId, req.body.spreadDir );
+					throw new Error( "DB connected but query did not execute." );
 				}
 
-				console.log( `Saved User ${ payload.name }'s Spread.` );
-				res.send( "Saved Spread!" );
+				console.log( "Saved User's Spread." );
+				res.json({ success: "Saved Spread!" });
 			}
 			catch ( err ) {
-				console.log( err );
-				res.json({ error: err });
+				res.status( 500 ).json({ error: ( err as Error ).message });
 			}
 			finally {
 				dbClient.release();
