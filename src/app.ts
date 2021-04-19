@@ -3,7 +3,7 @@ import { Pool, QueryResult } from "pg";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import cors from "cors";
 
-import { returnRandomSelectedSet } from "./utils/return-random-selected-set";
+import { getRandomUniqueCardIDs } from "./utils/getRandomUniqueCardsIDs";
 import { getCardsByIDQueryGen, saveCardSpreadQueryGen, upsertUserQueryGen } from "./pq-db-queries";
 import rateLimit from "express-rate-limit";
 //import { parseCookies } from "./utils/cookie-parser";
@@ -67,7 +67,7 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 			}
 
 			const dbClient = await dbConnectionPool.connect();
-			const queryParamsForID = getCardsByIDQueryGen( returnRandomSelectedSet( requestAmount ));
+			const queryParamsForID = getCardsByIDQueryGen( getRandomUniqueCardIDs( requestAmount ));
 			const queryResults: QueryResult<CardDBResults> = await dbClient.query( queryParamsForID );
 
 			dbClient.release();
@@ -82,7 +82,11 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 				return element;
 			});
 
-			res.json( directionalCards );
+			console.log( queryParamsForID.values );
+			const idOrder = queryParamsForID.values || [];
+			const orderedCardResults = idOrder.map( val => directionalCards.find( CardResult => CardResult.id === val ));
+
+			res.json( orderedCardResults );
 		})();
 	});
 

@@ -2,9 +2,9 @@ import { getRandomInt } from "./get-random-integer";
 
 /**
  * @param {number} requestAmount - The amount of random numbers selected up to a maximum of 78
- * @return {Set<number>} a set containing exclusive numbers corrisponding to a cards id within a tarot deck selected at random from 0-77
+ * @return {number[]} a set containing exclusive numbers corrisponding to a cards id within a tarot deck selected at random from 0-77
  */
-export function returnRandomSelectedSet( requestAmount : number ) : Set<number> {
+export function getRandomUniqueCardIDs( requestAmount : number ) : number[] {
 
 	const randomSelectedCards: number[] = [];
 	const numbersToChooseFrom: number[] = [...Array( 78 ).keys()]; // numbers 0 - 77 for keys
@@ -20,6 +20,6 @@ export function returnRandomSelectedSet( requestAmount : number ) : Set<number> 
 		numbersToChooseFrom.splice( numSelectedToRemove, 1 );
 	}
 
-	return new Set( randomSelectedCards );
+	return randomSelectedCards;
 }
 

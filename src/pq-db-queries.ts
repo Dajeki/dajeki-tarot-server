@@ -45,10 +45,10 @@ export function getCardBySuitQueryGen( suitType : TarotSuits ) : QueryConfig<Tar
 }
 
 /**
- * @param {Set<number>} cardIds - An set of card ID's to have been selected
+ * @param {number[]} cardIds - An set of unique card ID's to have been selected
  * @return {QueryConfig<number[]> | undefined} Query Config object for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with a 	   	 supplied set of numbers between 0-77 to query from the db.
  */
-export function getCardsByIDQueryGen( cardIds : Set<number> ) : QueryConfig<number[]> {
+export function getCardsByIDQueryGen( cardIds : number[] ) : QueryConfig<number[]> {
 
 	let queryString = `SELECT
 			public.cards.card_name,
@@ -64,14 +64,14 @@ export function getCardsByIDQueryGen( cardIds : Set<number> ) : QueryConfig<numb
 		WHERE public.cards.id = $1`;
 
 	//start iterator at one as it is included in the origional queryString.
-	for( let i = 1; i < cardIds.size; ) {
+	for( let i = 1; i < cardIds.length; ) {
 		queryString += ` OR public.cards.id = $${ ++i }`;
 	}
 	queryString += ";";
 
 	return {
 		text  : queryString,
-		values: [...cardIds.keys()],
+		values: cardIds,
 	};
 }
 
