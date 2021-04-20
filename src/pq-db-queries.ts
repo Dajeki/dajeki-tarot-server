@@ -113,6 +113,6 @@ export function saveCardSpreadQueryGen( cardIds : number[], userId : string, spr
 
 	return {
 		text  : queryString,
-		values: [userId, spreadId, ...cardIds, new Date().toISOString(), spreadDirection ],
+		values: [userId, spreadId, ...cardIds, new Date().toUTCString(), spreadDirection ],
 	};
 }
