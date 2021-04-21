@@ -39,8 +39,9 @@
 			{ 
 				"overrides": {
 					"catch": { "after": false },
-					"if": { "after": false }
-
+					"if": { "after": false },
+					"for":  { "after": false },
+					"while":  { "after": false }
 				},
 				"before": true, 
 				"after": true 

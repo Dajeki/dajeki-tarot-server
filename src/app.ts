@@ -1,12 +1,14 @@
 import express from "express";
-import { Pool, QueryResult } from "pg";
-import { OAuth2Client, TokenPayload } from "google-auth-library";
-
 import rateLimit from "express-rate-limit";
 import cors from "cors";
 
+import { Pool, PoolClient, QueryResult } from "pg";
+import { OAuth2Client } from "google-auth-library";
+
 import { getRandomUniqueCardIDs } from "./utils/getRandomUniqueCardsIDs";
 import { getCardsByIDQueryGen, saveCardSpreadQueryGen, upsertUserQueryGen } from "./pq-db-queries";
+import { errorGen } from "./utils/error-gen";
+import { randomDirectionResults } from "./utils/randomize-card-direction";
 
 const app = express();
 
@@ -33,6 +35,9 @@ app.use( "/cards/save_spread", express.json());
 const PORT = parseInt( process.env.PORT || "0" );
 const { GOOGLE_CLIENT_ID, DATABASE_URL } = process.env;
 
+/**
+ * Checking to make sure that the .env variables that are required for the backend are set.
+ */
 if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 
 	const client = new OAuth2Client( GOOGLE_CLIENT_ID );
@@ -45,7 +50,7 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 		const JWT = req.headers.authorization?.split( " " )[1];
 		try {
 			if( !JWT ) {
-				throw new Error( "No JWT sent with request." );
+				throw errorGen( "TokenError", "No loggin credentials sent with request." );
 			}
 			//Error thrown here if JWT inccorect.
 			const ticket = await client.verifyIdToken({
@@ -76,44 +81,36 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 	 */
 	app.get( "/cards/:amount", ( req, res ) => {
 		( async function () {
-
 			const requestAmount = parseInt( req.params.amount );
+			//needs to be "defined" so I can attempt to call a free on the connection in the finally block
+			let dbClient: PoolClient | undefined = undefined;
 
-			if( requestAmount > 78 ) {
-				res.json( "{ \"error\": \"There are only 78 cards in a Tarot Deck.\"}" );
-				return;
-			}
-			else if( requestAmount < 1 ) {
-				res.json( "{ \"error\": \"Please ask for at least 1 card.\"}" );
-				return;
-			}
-			else if( isNaN( requestAmount )) {
-				res.json( "{ \"error\": \"The request card amount is not a number.\"}" );
-				return;
-			}
-
-			const dbClient = await dbConnectionPool.connect();
-			const queryParamsForID = getCardsByIDQueryGen( getRandomUniqueCardIDs( requestAmount ));
-			const queryResults: QueryResult<CardDBResults> = await dbClient.query( queryParamsForID );
-
-			dbClient.release();
-
-			//random up or down direction by removing the property that isnt needed.
-			const directionalCards: CardDBResults[] = queryResults.rows.map( element => {
-				if( Math.random() * 10 >= 5 ) {
-					delete element.card_meaning_up;
+			try {
+				if( isNaN( requestAmount )) {
+					throw errorGen( "RequestNaN", "The requested amount is not a number." );
 				}
-				else {
-					delete element.card_meaning_down;
+				else if( requestAmount < 1 ) {
+					throw errorGen( "RequestTooLow", "Please ask for at least 1 card." );
 				}
-				return element;
-			});
+				else if( requestAmount > 78 ) {
+					throw errorGen( "RequestTooHigh", "The request card amount is not a number." );
+				}
 
-			const idOrder = queryParamsForID.values || [];
-			//Put the query results for the cards back in the randomly selected order from earlier.
-			const orderedCardResults = idOrder.map( val => directionalCards.find( CardResult => CardResult.id === val ));
+				dbClient = await dbConnectionPool.connect();
+				const queryParamsForID = getCardsByIDQueryGen( getRandomUniqueCardIDs( requestAmount ));
+				const queryResults: QueryResult<CardDBResults> = await dbClient.query( queryParamsForID );
 
-			res.json( orderedCardResults );
+				//Put the query results for the cards back in the randomly selected order from earlier.
+				const orderedCardResults = randomDirectionResults( queryParamsForID.values || [], queryResults.rows );
+				res.json( orderedCardResults );
+			}
+			catch( err ) {
+				res.status( 400 )
+					.json({ error: ( err as Error ).message });
+			}
+			finally {
+				dbClient?.release();
+			}
 		})();
 	});
 
@@ -123,16 +120,19 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 	 */
 	app.post( "/userInfo/login", ( req, res ) => {
 		( async function () {
-			const dbClient = await dbConnectionPool.connect();
+			//needs to be "defined" so I can attempt to call a free on the connection in the finally block
+			let dbClient: PoolClient | undefined = undefined;
 
 			try {
 				if( !req.googleTokenPayload ) {
-					throw new Error( "Google JWT Error." );
+					throw errorGen( "TokenError", "Not logged in or incorrect token sent with response." );
 				}
 				//Sub is UUID, given_name is either hidden or Full name
 				const { sub: userId, given_name = "" } = req.googleTokenPayload;
 				const [queryUpdateUser, queryInsertUser] = upsertUserQueryGen({ username: given_name, id: userId });
 
+				//CONNECT TO DB HERE
+				dbClient = await dbConnectionPool.connect();
 				const updateQueryResults = await dbClient.query( queryUpdateUser );
 				console.log( "Rows affected from update:", updateQueryResults.rowCount );
 
@@ -148,7 +148,7 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 					.json({ error: ( err as Error ).message });
 			}
 			finally {
-				dbClient.release();
+				dbClient?.release();
 			}
 		})();
 	});
@@ -160,23 +160,24 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 	 */
 	app.put( "/cards/save_spread", ( req, res ) => {
 		( async function () {
+			//needs to be "defined" so I can attempt to call a free on the connection in the finally block
+			let dbClient: PoolClient | undefined = undefined;
 
-			const dbClient = await dbConnectionPool.connect();
 			try {
 				if( !req.googleTokenPayload ) {
-					throw new Error( "Not logged in or incorrect token sent with response." );
+					throw errorGen( "TokenError", "Not logged in or incorrect token sent with response." );
 				}
-
 				const { sub: userId } = req.googleTokenPayload;
 
+				//CONNECT TO DB HERE
+				dbClient = await dbConnectionPool.connect();
 				//Check to make sure that a spread has not been saved today by querying the saved spread db.
 				const savedAlready =  await dbClient.query({
 					text  : "SELECT public.user_draws.date_drawn FROM public.user_draws WHERE public.user_draws.date_drawn = $1",
 					values: [new Date().toUTCString()],
 				});
 				if( savedAlready.rowCount > 0 ) {
-					console.log();
-					throw new Error( "Only one spread can be saved per day." );
+					throw errorGen( "FrequencyError", "Only one spread can be saved per day." );
 				}
 
 				const saveCardQuery = saveCardSpreadQueryGen( req.body.cards, userId, req.body.spreadId, req.body.spreadDir );
@@ -185,7 +186,7 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 				if( saveQueryResults.rowCount === 0 ) {
 					//Check to make sure the body is what we expected.
 					console.log( req.body.cards, userId, req.body.spreadId, req.body.spreadDir );
-					throw new Error( "DB connected but query did not execute." );
+					throw errorGen( "DbError", "DB connected but query did not execute." );
 				}
 
 				console.log( "Saved User's Spread." );
@@ -194,11 +195,12 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 			catch( err ) {
 				res.status( 500 ).json({
 					error    : ( err as Error ).message,
-					availDate: new Date( Date.now() + 86_400_000 ).getTime(),
+					//If this error comes from the frequency error send the date with the response
+					availDate: ( err as Error ).name === "FrequencyError" ? new Date( Date.now() + 86_400_000 ).getTime(): null,
 				});
 			}
 			finally {
-				dbClient.release();
+				dbClient?.release();
 			}
 		})();
 	});
@@ -216,6 +218,6 @@ else {
 	errorString += GOOGLE_CLIENT_ID ? "GOOGLE_CLIENT_ID\n" : "";
 	errorString += DATABASE_URL ? "DATABASE_URL\n" : "";
 
-	throw new Error( `${ errorString }Please set the above .env variables in the project's .env file.` );
+	throw errorGen( "EnvError", `${ errorString }Please set the above .env variables in the project's .env file.` );
 
 }
