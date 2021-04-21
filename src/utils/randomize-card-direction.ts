@@ -3,7 +3,7 @@
  * @param {CardDbResults[]} cardList - list of cards to be put in the specified order of the idOrder array
  * @return {CardDbResults[]} cards in an array maintaining the order set by the idOrder parameter.
  */
-export function randomDirectionResults( idOrder: number[], cardList: CardDBResults[] ) : CardDBResults[] {
+export function randomDirectionOrdered( idOrder: number[], cardList: CardDBResults[] ) : CardDBResults[] {
 	//random up or down direction by removing the property that isnt needed.
 	const directionalCards: CardDBResults[] = cardList.map( element => {
 		if( Math.random() * 10 >= 5 ) {
@@ -17,6 +17,6 @@ export function randomDirectionResults( idOrder: number[], cardList: CardDBResul
 
 	//Put the query results for the cards back in the randomly selected order from earlier.
 	const orderedCardResults = idOrder.map( val => directionalCards.find( CardResult => CardResult.id === val ));
-	return orderedCardResults && [];
+	return orderedCardResults as CardDBResults[] || [];
 }
 
