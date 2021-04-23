@@ -12,17 +12,19 @@ type CardDBResults = {
 }
 
 type PastSpreadsResults = {
-	id					: number,
-	date_drawn			: Date,
-	spread_meaning_id	: number,
-	direction			: string,
-	suit				: string,
-	card_name			: string,
-	cards_id			: number
-	element				: string,
-	card_rank			: number,
-	card_meaning_up		?: string,
-	card_meaning_down	?: string,
+	id							: number,
+	date_drawn					: Date,
+	card_one_spread_meaning		: string
+	card_two_spread_meaning		: string
+	card_three_spread_meaning	: string
+	direction					: string,
+	suit						: string,
+	card_name					: string,
+	card_id						: number
+	element						: string,
+	card_rank					: number,
+	card_meaning_up				?: string,
+	card_meaning_down			?: string,
 }
 
 /**
@@ -30,9 +32,5 @@ type PastSpreadsResults = {
  */
 type DajekiTarotUser = {
 	username: string,
-
-	/**
-	 * This is the 'sub' property on the Google JWT
-	 */
-	id		: string
+	id		: string	//This is the 'sub' property on the Google JWT
 }

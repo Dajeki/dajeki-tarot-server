@@ -125,7 +125,9 @@ export function getPastSavedSpreadsQueryGen( userId : string ) : QueryConfig<str
 	const queryString = `SELECT
 			public.user_draws.id,
 			public.user_draws.date_drawn,
-			public.user_draws.spread_meaning_id,
+			public.spread_meanings.card_one_spread_meaning,
+			public.spread_meanings.card_two_spread_meaning,
+			public.spread_meanings.card_three_spread_meaning,
 			public.user_draws.direction,
 			public.cards.card_name,
 			public.cards.id as cards_id,
@@ -140,6 +142,7 @@ export function getPastSavedSpreadsQueryGen( userId : string ) : QueryConfig<str
 			public.user_draws.card_three_id = public.cards.id
 		INNER JOIN public.elements ON public.cards.element_id = public.elements.id
 		INNER JOIN public.suits ON public.cards.suit_id = public.suits.id
+		INNER JOIN public.spread_meanings ON public.user_draws.spread_meaning_id = public.spread_meanings.id
 		WHERE public.user_draws.user_id = $1
 		ORDER BY public.user_draws.date_drawn; `;
 
