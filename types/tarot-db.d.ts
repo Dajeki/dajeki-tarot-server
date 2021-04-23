@@ -11,6 +11,20 @@ type CardDBResults = {
 	card_name			: string,
 }
 
+type PastSpreadsResults = {
+	id					: number,
+	date_drawn			: Date,
+	spread_meaning_id	: number,
+	direction			: string,
+	suit				: string,
+	card_name			: string,
+	cards_id			: number
+	element				: string,
+	card_rank			: number,
+	card_meaning_up		?: string,
+	card_meaning_down	?: string,
+}
+
 /**
  * An object containing name supplied to Google by the user and a UUID supplied by Google OAuth
  */

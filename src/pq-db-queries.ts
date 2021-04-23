@@ -116,3 +116,35 @@ export function saveCardSpreadQueryGen( cardIds : number[], userId : string, spr
 		values: [userId, spreadId, ...cardIds, new Date().toUTCString(), spreadDirection ],
 	};
 }
+
+/**
+ * @param {string} userId - ID of the user to return spreads for
+ * @return {QueryConfig<string> | undefined} Query Config object for {@link https://www.npmjs.com/package/pg|postgres (pg)} library with a supplied userId to get previous saved spreads for.
+ */
+export function getPastSavedSpreadsQueryGen( userId : string ) : QueryConfig<string[]> {
+	const queryString = `SELECT
+			public.user_draws.id,
+			public.user_draws.date_drawn,
+			public.user_draws.spread_meaning_id,
+			public.user_draws.direction,
+			public.cards.card_name,
+			public.cards.id as cards_id,
+			public.cards.card_meaning_up,
+			public.cards.card_meaning_down,
+			public.elements.element,
+			public.suits.suit
+		FROM public.user_draws
+		INNER JOIN public.cards ON
+			public.user_draws.card_one_id = public.cards.id OR
+			public.user_draws.card_two_id = public.cards.id OR
+			public.user_draws.card_three_id = public.cards.id
+		INNER JOIN public.elements ON public.cards.element_id = public.elements.id
+		INNER JOIN public.suits ON public.cards.suit_id = public.suits.id
+		WHERE public.user_draws.user_id = $1
+		ORDER BY public.user_draws.date_drawn; `;
+
+	return {
+		text  : queryString,
+		values: [userId],
+	};
+}

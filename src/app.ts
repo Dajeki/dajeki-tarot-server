@@ -6,7 +6,7 @@ import { Pool, PoolClient, QueryResult } from "pg";
 import { OAuth2Client } from "google-auth-library";
 
 import { getRandomUniqueCardIDs } from "./utils/getRandomUniqueCardsIDs";
-import { getCardsByIDQueryGen, saveCardSpreadQueryGen, upsertUserQueryGen } from "./pq-db-queries";
+import { getCardsByIDQueryGen, getPastSavedSpreadsQueryGen, saveCardSpreadQueryGen, upsertUserQueryGen } from "./pq-db-queries";
 import { errorGen } from "./utils/error-gen";
 import { randomDirectionOrdered } from "./utils/randomize-card-direction";
 
@@ -102,6 +102,39 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 			//Put the query results for the cards back in the randomly selected order from earlier.
 			const orderedCardResults = randomDirectionOrdered( queryParamsForID.values || [], queryResults.rows );
 			res.json( orderedCardResults );
+		}
+		catch( err ) {
+			res.status( 400 )
+				.json({ error: ( err as Error ).message });
+		}
+		finally {
+			dbClient?.release();
+		}
+	});
+
+	/**
+	 * Cards db access.
+	 * :amount - should be the number of random cards you would like returned.
+	 * request is returned as as application/json
+	 */
+	app.get( "/userInfo/past_spread", async ( req, res ) => {
+
+		//needs to be "defined" so I can attempt to call a free on the connection in the finally block
+		let dbClient: PoolClient | undefined = undefined;
+
+		try {
+			if( !req.googleTokenPayload ) {
+				throw errorGen( "TokenError", "Not logged in or incorrect token sent with response." );
+			}
+
+			//Only need the sub from the JWT token
+			const { sub: userId } = req.googleTokenPayload;
+			const pastSpreadsQuery = getPastSavedSpreadsQueryGen( userId );
+
+			dbClient = await dbConnectionPool.connect();
+			const queryResults: QueryResult<PastSpreadsResults> = await dbClient.query( pastSpreadsQuery );
+
+			res.json( queryResults.rows );
 		}
 		catch( err ) {
 			res.status( 400 )
