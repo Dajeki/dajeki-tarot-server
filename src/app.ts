@@ -15,7 +15,7 @@ const app = express();
 const optionsCors: cors.CorsOptions = {
 	credentials      : true,
 	methods          : "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
-	origin           : "https://localhost:3000",
+	origin           : ["https://localhost:3000", "https://192.168.1.7:3000"],
 	preflightContinue: false,
 };
 
@@ -149,7 +149,6 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 		}
 	});
 
-
 	/**
 	 * Save spread endpoint that will require the user to be logged in to use.
 	 * The request to this endpoint body should be sent in JSON as the body will be parsed as such.
@@ -191,7 +190,7 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 			res.status( 500 ).json({
 				error    : ( err as Error ).message,
 				//If this error comes from the frequency error send the date with the response
-				availDate: ( err as Error ).name === "FrequencyError" ? new Date( Date.now() + 86_400_000 ).getTime(): null,
+				availTime: ( err as Error ).name === "FrequencyError" ? 24 - new Date( Date.now()).getUTCHours() : null,
 			});
 		}
 		finally {
