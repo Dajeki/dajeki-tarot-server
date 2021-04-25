@@ -1,4 +1,4 @@
-import { getRandomInt } from "./get-random-integer";
+import { getRandomInt } from "./getRandomInteger";
 
 /**
  * @param {number} requestAmount - The amount of random numbers selected up to a maximum of 78
@@ -11,7 +11,7 @@ export function getRandomUniqueCardIDs( requestAmount : number ) : number[] {
 	let numSelectedToRemove: number;
 
 	//Get a random ID from the numbersToChooseFrom, remove it, and place it into randomSelectedCards
-	for ( let i = 0; i < requestAmount; i++ ) {
+	for( let i = 0; i < requestAmount; i++ ) {
 		numSelectedToRemove = getRandomInt( numbersToChooseFrom.length );
 
 		randomSelectedCards.push( numbersToChooseFrom[numSelectedToRemove] );

@@ -1,4 +1,4 @@
-/** @module utils/get-random-integer */
+/** @module utils/getRandomInteger */
 
 /**
  * @param {number} max - max value of the random number

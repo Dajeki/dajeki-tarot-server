@@ -12,7 +12,7 @@ function promisfiedCSVParse( fileName: string ): Promise<ITarotCSVRow[]> {
 		fs.createReadStream( fileName )
 			.pipe( csv())
 			.on( "data", ( data: string[] ) => {
-				if ( isNaN( Number( data[0] ))) {
+				if( isNaN( Number( data[0] ))) {
 					return;
 				}
 
@@ -45,7 +45,7 @@ async function insertCardsIntoDB() {
 
 	client.connect();
 
-	for ( let cardIdx = 0; cardIdx < cards.length; cardIdx++ ) {
+	for( let cardIdx = 0; cardIdx < cards.length; cardIdx++ ) {
 
 		const a = await client.query({
 			text:

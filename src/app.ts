@@ -6,9 +6,9 @@ import { Pool, PoolClient, QueryResult } from "pg";
 import { OAuth2Client } from "google-auth-library";
 
 import { getRandomUniqueCardIDs } from "./utils/getRandomUniqueCardsIDs";
-import { getCardsByIDQueryGen, getPastSavedSpreadsQueryGen, saveCardSpreadQueryGen, upsertUserQueryGen } from "./pq-db-queries";
-import { errorGen } from "./utils/error-gen";
-import { randomDirectionOrdered } from "./utils/randomize-card-direction";
+import { getCardsByIDQueryGen, getPastSavedSpreadsQueryGen, saveCardSpreadQueryGen, upsertUserQueryGen } from "./pqDbQueries";
+import { errorGen } from "./utils/errorGen";
+import { randomDirectionOrdered } from "./utils/randomizeCardDirection";
 
 const app = express();
 
@@ -113,39 +113,6 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 	});
 
 	/**
-	 * Cards db access.
-	 * :amount - should be the number of random cards you would like returned.
-	 * request is returned as as application/json
-	 */
-	app.get( "/userInfo/past_spread", async ( req, res ) => {
-
-		//needs to be "defined" so I can attempt to call a free on the connection in the finally block
-		let dbClient: PoolClient | undefined = undefined;
-
-		try {
-			if( !req.googleTokenPayload ) {
-				throw errorGen( "TokenError", "Not logged in or incorrect token sent with response." );
-			}
-
-			//Only need the sub from the JWT token
-			const { sub: userId } = req.googleTokenPayload;
-			const pastSpreadsQuery = getPastSavedSpreadsQueryGen( userId );
-
-			dbClient = await dbConnectionPool.connect();
-			const queryResults: QueryResult<PastSpreadsResults> = await dbClient.query( pastSpreadsQuery );
-
-			res.json( queryResults.rows );
-		}
-		catch( err ) {
-			res.status( 400 )
-				.json({ error: ( err as Error ).message });
-		}
-		finally {
-			dbClient?.release();
-		}
-	});
-
-	/**
 	 * Login endpoint
 	 * Currently verifies only Google 0Auth2 JWT -  https://developers.google.com/identity/sign-in/web/backend-auth#verify-the-integrity-of-the-id-token
 	 */
@@ -225,6 +192,38 @@ if( PORT && GOOGLE_CLIENT_ID && DATABASE_URL ) {
 				//If this error comes from the frequency error send the date with the response
 				availTime: ( err as Error ).name === "FrequencyError" ? 24 - new Date( Date.now()).getUTCHours() : null,
 			});
+		}
+		finally {
+			dbClient?.release();
+		}
+	});
+
+	/**
+	 * Users past spread enpoint
+	 * request only requires that the JWT is sent with the response to get the last 7 user saved spreads.
+	 */
+	app.get( "/userInfo/past_spread", async ( req, res ) => {
+
+		//needs to be "defined" so I can attempt to call a free on the connection in the finally block
+		let dbClient: PoolClient | undefined = undefined;
+
+		try {
+			if( !req.googleTokenPayload ) {
+				throw errorGen( "TokenError", "Not logged in or incorrect token sent with response." );
+			}
+
+			//Only need the sub from the JWT token
+			const { sub: userId } = req.googleTokenPayload;
+			const pastSpreadsQuery = getPastSavedSpreadsQueryGen( userId );
+
+			dbClient = await dbConnectionPool.connect();
+			const queryResults: QueryResult<PastSpreadsResults> = await dbClient.query( pastSpreadsQuery );
+
+			res.json( queryResults.rows );
+		}
+		catch( err ) {
+			res.status( 400 )
+				.json({ error: ( err as Error ).message });
 		}
 		finally {
 			dbClient?.release();
