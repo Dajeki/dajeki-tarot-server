@@ -1,4 +1,4 @@
-//import "./lib/env"; //conditional render of development or production env variables COMMENT OUT FOR DEPLOYMENT ON HEROKU
+import "./lib/env"; //conditional render of development or production env variables COMMENT OUT FOR DEPLOYMENT ON HEROKU
 
 import express from "express";
 import rateLimit from "express-rate-limit";
