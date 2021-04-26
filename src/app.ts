@@ -1,4 +1,4 @@
-//import "./lib/env"; //conditional render of development or production env variables COMMENT OUT FOR DEPLOYMENT ON HEROKU
+import "./lib/env"; //conditional render of development or production env variables COMMENT OUT FOR DEPLOYMENT ON HEROKU
 
 import express from "express";
 import rateLimit from "express-rate-limit";
@@ -14,12 +14,10 @@ import { randomDirectionOrdered } from "./utils/randomizeCardDirection";
 
 const app = express();
 
-console.log( process.env.NODE_ENV );
-
 const optionsCors: cors.CorsOptions = {
 	credentials      : true,
 	methods          : "GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE",
-	origin           : ["https://localhost:3000", "https://192.168.1.7:3000"],
+	origin           : [`${ process.env.ACCEPTED_ORIGIN }`],
 	preflightContinue: false,
 };
 
@@ -35,7 +33,7 @@ app.use( rateLimit( optionsLimiter ));
 
 //save_spread enpoint is going to come as a JSON object from the front end.
 app.use( "/cards/save_spread", express.json());
-
+console.log( process.env.REACT_APP_API_URL );
 const PORT = parseInt( process.env.PORT || "0" );
 const { GOOGLE_CLIENT_ID, DATABASE_URL } = process.env;
 

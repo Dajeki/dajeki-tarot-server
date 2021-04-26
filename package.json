@@ -11,7 +11,6 @@
     "devStart": "nodemon -e ts --exec \"tsc && heroku local web\" || exit 1",
     "start": "node ./build/app.js",
     "build": "tsc",
-    "postinstall": "tsc",
     "saveDBCreds": "heroku config:get DATABASE_URL -a dajeki-tarot -s  > .env"
   },
   "keywords": [],
