@@ -1,3 +1,5 @@
+import "./lib/env"; //conditional render of development or production env variables
+
 import express from "express";
 import rateLimit from "express-rate-limit";
 import cors from "cors";
@@ -11,6 +13,8 @@ import { errorGen } from "./utils/errorGen";
 import { randomDirectionOrdered } from "./utils/randomizeCardDirection";
 
 const app = express();
+
+console.log( process.env.NODE_ENV );
 
 const optionsCors: cors.CorsOptions = {
 	credentials      : true,

@@ -1,5 +1,9 @@
 node_modules
+/src/lib/
+/src/db_file_scripts/*
 .env
+.env.production
+.env.development
 nodemon.json
 /.idea/
 .idea
