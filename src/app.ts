@@ -1,4 +1,4 @@
-import "./lib/env"; //conditional render of development or production env variables COMMENT OUT FOR DEPLOYMENT ON HEROKU
+//import "./lib/env"; //conditional render of development or production env variables COMMENT OUT FOR DEPLOYMENT ON HEROKU
 
 import express from "express";
 import rateLimit from "express-rate-limit";
@@ -28,7 +28,7 @@ const optionsLimiter: rateLimit.Options = {
 	max     : 100,
 	message : "{\"error\": \"Too many calls to this endpoint. You are limited to 100 per minute.\"}",
 };
-
+app.set( "trust proxy", 1 );
 app.use( rateLimit( optionsLimiter ));
 
 //save_spread enpoint is going to come as a JSON object from the front end.

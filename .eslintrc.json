@@ -47,6 +47,9 @@
 				"after": true 
 			}
 		],
+		
+		"eqeqeq" : 1,
+
 		"semi-spacing": [
 			"error", 
 			{ 

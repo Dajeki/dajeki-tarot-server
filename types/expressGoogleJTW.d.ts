@@ -6,3 +6,5 @@ declare module "express-serve-static-core" {
 		googleTokenPayload?: TokenPayload
 	}
 }
+
+//Declaration Merging
